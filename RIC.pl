@@ -1,7 +1,7 @@
-#**********************USAGE****************************************#
-# prompt> perl RIC.pl <sequence file> RC_YN PERM_MODE_YN NUM_PERMS  #
-#                                                                   #
-#*******************************************************************#
+#**********************USAGE**********************************#
+# prompt> perl RIC.pl <sequence file> PERM_MODE_YN NUM_PERMS  #
+#                                                             #
+#*************************************************************#
 
 use strict;
 use File::Basename;
@@ -16,8 +16,8 @@ my $rstype;
 my $outfile;
 my $searchfile;
 my $tempseqfile;
-my $revcomp_stat;
-my $revcomp_arg;
+##my $revcomp_stat;
+#my $revcomp_arg;
 my $perm_arg;
 my $perm_stat;
 my @exts = qw(.txt .fa .fasta);
@@ -25,29 +25,14 @@ my $num_perms=1;
 
 #Read in the sequence(s) to be searched for RIC scoring.
 $searchfile = $ARGV[0];
-$revcomp_arg= $ARGV[1];
+
 if ($searchfile eq ""){
     print "Enter the name of the file containing the sequences to search: ";
     $searchfile = <STDIN>;
 }
-if(!( ($revcomp_arg=~m/^yes$/i) || ($revcomp_arg=~m/^no$/i) ) )
-	{
-	die "Error, expect revcomp_arg be 'yes' or 'no' !\n";
-	}
-else
-	{
-	if($revcomp_arg=~m/^yes$/i)
-		{
-		$revcomp_stat=1;
-		}
-	else
-		{
-		$revcomp_stat=0;
-		}
-	}
 
 
-$perm_arg=$ARGV[2];
+$perm_arg=$ARGV[1];
 if(!( ($perm_arg=~m/^yes$/i) || ($perm_arg=~m/^no$/i) ) )
 	{
 	die "Error, expect permutation argument either 'yes' or 'no' !\n";
@@ -65,7 +50,7 @@ else
 	}
 
 
-$num_perms=$ARGV[3];
+$num_perms=$ARGV[2];
 if(!($num_perms=~m/^[0-9]+$/))
 	{
 	die "Invalid 'num_perms' value $num_perms !\n";
@@ -75,6 +60,8 @@ if($num_perms<1)
 	die "Invalid 'num_perms' value  $num_perms . Must be a positive integer!\n";
 	}
 
+
+die "perm_mode=".$perm_stat." and num_perms=".$num_perms."\n";
 
 
 $searchfile =~ s/\n//g;
@@ -247,6 +234,7 @@ sub RICSCORE{
     }
     
     print "Computing RIC scores for $searchfile.\nSaving to $outfile. . .\n";
+    my $permID=0;
     if($perm_stat==0) 
 	{
 	    open(FOUT,">$outfile");
@@ -255,90 +243,106 @@ sub RICSCORE{
 	{
 	    open(FOUT,">>$outfile");
 	}
-    open(ISEQ, "<$searchfile");
-    my $tempPath="/dev/shm/$outfile.temp.txt";
-    #my $numTempPathIO=0;
+
     
+    for(my $permID=1;$permID<=$num_perms;$permID++)
+	{
 
-    while($tempin = <ISEQ>){
+
+	    open(ISEQ, "<$searchfile");
+	    my $tempPath="/dev/shm/$outfile.temp.txt";
+	    #my $numTempPathIO=0;
+
+	    while($tempin = <ISEQ>){
 		
-		if (-e $tempPath){
-			unlink($tempPath);
-		}
-		open O, ">$tempPath";
-		$fastaheader = $tempin;
-		$fastaheader =~ s/\n//g;
-		$fastaheader =~ s/\r//g;
-        unless($tempin =~ /^>/){
-			print "Invalid input file. Input must be in FASTA format.\n";
-			exit;
-		}
-		$tempin = <ISEQ>;
-		print O "$tempin";
-		close (O);
-        
-		open(FIN,"<$tempPath")
-		or die "Cannot open searchfile $tempPath.\n";
-	#$numTempPathIO++;
-    	$fileempty = 0;
-		$phony = 0 ;
-		$tempin = <FIN>;
-		$tempin =~ s/\n//g;
-		$tempin =~ s/\r//g;
-		$tempin =~ tr/[A-Z]/[a-z]/;
-		@ricseq = split(//,$tempin);
-
-		while($fileempty==0){
-			$totalprod = 0;
-			if(scalar(@ricseq) < $searchspace){last;}
-			$phony += 1;
-			$conserved = $ricseq[0].$ricseq[1];
-			if($conserved eq "ca"){
-			   
-			    foreach $m (@model){
-					$lookup = "";
-					@positions = split(/,/,$m);
-					@positions = sort {$x<=>$y}@positions;
-					$class = scalar(@positions);
-					foreach $pos (@positions){
-					    $curr = $ricseq[$pos-1];
-					    $lookup .= $curr;
-					    $lastpos = $pos;
-					}
-					$lookup = $lastpos.$lookup;
-					if(exists $scores{$lookup}){
-					    $q = $scores{$lookup};
-					} else {
-						$q = 0;
-					}
-					$prob = ($q + ($a/(4**$class)))/($colcounts[$lastpos-1] + $a);
-					$prob = log($prob);
-					$totalprod = $totalprod + $prob;
-			    }
-			    
-			    $end = $phony+$searchspace-1;
-
-			    if($totalprod >= $_[0]){
-				    print FOUT "$fastaheader\t";
-				    print FOUT "$phony\t$end\t";
-				    for($counter=0;$counter<$searchspace;$counter++){
-						print FOUT $ricseq[$counter];
-				    }
-				    print FOUT "\t$totalprod";
-				    print FOUT "\n";
-			    }
-
+			if (-e $tempPath){
+				unlink($tempPath);
 			}
-			shift(@ricseq);
-		}#end of while($fileempty==0)
-	    
-        if (-e $tempPath){
-           unlink($tempPath);
-        }
+			open O, ">$tempPath";
+			$fastaheader = $tempin;
+			$fastaheader =~ s/\n//g;
+			$fastaheader =~ s/\r//g;
+		unless($tempin =~ /^>/){
+				print "Invalid input file. Input must be in FASTA format.\n";
+				exit;
+			}
+			$tempin = <ISEQ>;
+			print O "$tempin";
+			close (O);
+		
+			open(FIN,"<$tempPath")
+			or die "Cannot open searchfile $tempPath.\n";
+		#$numTempPathIO++;
+	    	$fileempty = 0;
+			$phony = 0 ;
+			$tempin = <FIN>;
+			$tempin =~ s/\n//g;
+			$tempin =~ s/\r//g;
+			$tempin =~ tr/[A-Z]/[a-z]/;
+			@ricseq = split(//,$tempin);
+
+			while($fileempty==0){
+				$totalprod = 0;
+				if(scalar(@ricseq) < $searchspace){last;}
+				$phony += 1;
+				$conserved = $ricseq[0].$ricseq[1];
+				if($conserved eq "ca"){
+				   
+				    foreach $m (@model){
+						$lookup = "";
+						@positions = split(/,/,$m);
+						@positions = sort {$x<=>$y}@positions;
+						$class = scalar(@positions);
+						foreach $pos (@positions){
+						    $curr = $ricseq[$pos-1];
+						    $lookup .= $curr;
+						    $lastpos = $pos;
+						}
+						$lookup = $lastpos.$lookup;
+						if(exists $scores{$lookup}){
+						    $q = $scores{$lookup};
+						} else {
+							$q = 0;
+						}
+						$prob = ($q + ($a/(4**$class)))/($colcounts[$lastpos-1] + $a);
+						$prob = log($prob);
+						$totalprod = $totalprod + $prob;
+				    }
+				    
+				    $end = $phony+$searchspace-1;
+
+				    if($totalprod >= $_[0]){
+					    print FOUT "$fastaheader\t";
+					    print FOUT "$phony\t$end\t";
+					    for($counter=0;$counter<$searchspace;$counter++){
+							print FOUT $ricseq[$counter];
+					    }
+					    print FOUT "\t$totalprod";
+					    print FOUT "\n";
+				    }
+
+				}
+				shift(@ricseq);
+			}#end of while($fileempty==0)
+		    
+		if (-e $tempPath){
+		   unlink($tempPath);
+		}
 	
-	}#end of while(loopthroughtempseq)
-    close(I);
-    close(FOUT);
+		}#end of while(loopthroughtempseq)
+	    close(I);
+	    close(FOUT);
+
+
+
+
+
+
+
+	} # END perm ID loop
+
+
+
     #print "numTempPathIO is $numTempPathIO\n";
 }
 
