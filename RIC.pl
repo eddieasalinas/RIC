@@ -195,8 +195,9 @@ sub RICSCORE{
     open(ISEQ, "<$searchfile");
 
     while($tempin = <ISEQ>){
-		if (-e "$outfile.temp.txt"){
-			unlink("$outfile.temp.txt");
+		my $tempPath="/dev/shm/$outfile.temp.txt"
+		if (-e $tempPath){
+			unlink($tempPath);
 		}
 		open O, ">$outfile.temp.txt";
 		$fastaheader = $tempin;
@@ -210,8 +211,8 @@ sub RICSCORE{
 		print O "$tempin";
 		close (O);
         
-		open(FIN,"<$outfile.temp.txt")
-		or die "Cannot open searchfile temp.txt.\n";
+		open(FIN,"<$tempPath")
+		or die "Cannot open searchfile $tempPath.\n";
     	$fileempty = 0;
 		$phony = 0 ;
 		$tempin = <FIN>;
@@ -264,8 +265,8 @@ sub RICSCORE{
 			shift(@ricseq);
 		}#end of while($fileempty==0)
 	    
-        if (-e "$outfile.temp.txt"){
-           unlink("$outfile.temp.txt");
+        if (-e $tempPath){
+           unlink($tempPath);
         }
 	
 	}#end of while(loopthroughtempseq)
