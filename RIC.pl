@@ -24,6 +24,10 @@ if ($searchfile eq ""){
     print "Enter the name of the file containing the sequences to search: ";
     $searchfile = <STDIN>;
 }
+
+
+
+
 $searchfile =~ s/\n//g;
 $outfile = $searchfile;
 
@@ -194,13 +198,14 @@ sub RICSCORE{
     open(FOUT,">$outfile");
     open(ISEQ, "<$searchfile");
     my $tempPath="/dev/shm/$outfile.temp.txt";
+    #my $numTempPathIO=0;
 
     while($tempin = <ISEQ>){
 		
 		if (-e $tempPath){
 			unlink($tempPath);
 		}
-		open O, ">$outfile.temp.txt";
+		open O, ">$tempPath";
 		$fastaheader = $tempin;
 		$fastaheader =~ s/\n//g;
 		$fastaheader =~ s/\r//g;
@@ -214,6 +219,7 @@ sub RICSCORE{
         
 		open(FIN,"<$tempPath")
 		or die "Cannot open searchfile $tempPath.\n";
+	#$numTempPathIO++;
     	$fileempty = 0;
 		$phony = 0 ;
 		$tempin = <FIN>;
@@ -273,4 +279,13 @@ sub RICSCORE{
 	}#end of while(loopthroughtempseq)
     close(I);
     close(FOUT);
+    #print "numTempPathIO is $numTempPathIO\n";
 }
+
+
+
+
+
+
+
+
