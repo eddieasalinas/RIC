@@ -193,9 +193,9 @@ sub RICSCORE{
     
     open(FOUT,">$outfile");
     open(ISEQ, "<$searchfile");
-
+    my $tempPath="/dev/shm/$outfile.temp.txt"
     while($tempin = <ISEQ>){
-		my $tempPath="/dev/shm/$outfile.temp.txt"
+		
 		if (-e $tempPath){
 			unlink($tempPath);
 		}
