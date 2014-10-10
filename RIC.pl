@@ -320,7 +320,8 @@ sub RICSCORE{
 			if($perm_stat==1)
 				{
 				#permute here
-				
+				my $permuted=$tempin;
+				$tempin=$permuted;
 				}
 			@ricseq = split(//,$tempin);
 
@@ -367,7 +368,7 @@ sub RICSCORE{
 					    for($counter=0;$counter<$searchspace;$counter++){
 							print FOUT "".$ricseq[$counter];
 					    }
-					    print FOUT "\$totalprod";
+					    print FOUT "\t$totalprod";
 					    print FOUT "\n";
 				    } #if total prod >= 
 
