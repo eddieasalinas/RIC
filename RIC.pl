@@ -60,9 +60,9 @@ if($num_perms<1)
 	die "Invalid 'num_perms' value  $num_perms . Must be a positive integer!\n";
 	}
 
-my $h="hello";
-my $ph=&PERMUTE_STR($h);
-die "perm_mode=".$perm_stat." and num_perms=".$num_perms." AND PH=$ph\n";
+#my $h="hello";
+#my $ph=&PERMUTE_STR($h);
+#die "perm_mode=".$perm_stat." and num_perms=".$num_perms." AND PH=$ph\n";
 
 
 $searchfile =~ s/\n//g;
@@ -317,7 +317,11 @@ sub RICSCORE{
 			$tempin =~ s/\n//g;
 			$tempin =~ s/\r//g;
 			$tempin =~ tr/[A-Z]/[a-z]/;
-
+			if($perm_stat==1)
+				{
+				#permute here
+				
+				}
 			@ricseq = split(//,$tempin);
 
 			while($fileempty==0){
@@ -351,12 +355,19 @@ sub RICSCORE{
 				    $end = $phony+$searchspace-1;
 
 				    if($totalprod >= $_[0]){
-					    print FOUT "MYHEADER$fastaheader\t";
-					    print FOUT "MYPHONY$phony\t$end\t";
+					    if($perm_stat==0)
+						{
+					    print FOUT "$fastaheader\t";
+						}
+						else
+						{
+					    print FOUT "$fastaheader.P=$permID\t";
+						}
+					    print FOUT "$phony\t$end\t";
 					    for($counter=0;$counter<$searchspace;$counter++){
-							print FOUT "THESEQ".$ricseq[$counter];
+							print FOUT "".$ricseq[$counter];
 					    }
-					    print FOUT "\tTHETOT$totalprod";
+					    print FOUT "\$totalprod";
 					    print FOUT "\n";
 				    } #if total prod >= 
 
