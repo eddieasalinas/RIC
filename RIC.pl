@@ -60,8 +60,9 @@ if($num_perms<1)
 	die "Invalid 'num_perms' value  $num_perms . Must be a positive integer!\n";
 	}
 
-
-die "perm_mode=".$perm_stat." and num_perms=".$num_perms."\n";
+my $h="hello";
+my $ph=&PERMUTE_STR($h);
+die "perm_mode=".$perm_stat." and num_perms=".$num_perms." AND PH=$ph\n";
 
 
 $searchfile =~ s/\n//g;
@@ -85,6 +86,42 @@ $numseqs = 0;
 
 
 #________end of program________
+
+#http://bioinfo2.ugr.es/documentation/Perl_Cookbook/ch04_18.htm
+# fisher_yates_shuffle( \@array ) : generate a random permutation
+# of @array in place
+sub fisher_yates_shuffle {
+    my $array = shift;
+    my $i;
+    for ($i = @$array; --$i; ) {
+        my $j = int rand ($i+1);
+        next if $i == $j;
+        @$array[$i,$j] = @$array[$j,$i];
+    }
+}
+
+
+
+sub PERMUTE_STR {
+	my $inStr=$_[0];
+	print "instr is $inStr\n";
+	#FROM http://perlmeme.org/faqs/manipulating_text/string_characters.html
+	my @chars = map substr( $inStr, $_, 1), 0 .. length($inStr) -1;
+	#for(my $c=0;$c<scalar(@chars);$c++)
+	#	{
+	#	print "chars[c] = ".$chars[$c]."\n";
+	#	}
+	fisher_yates_shuffle( \@chars );    # permutes @array in place
+	#print "....permute....\n";
+	#for(my $c=0;$c<scalar(@chars);$c++)
+	#	{
+	#	print "chars[c] = ".$chars[$c]."\n";
+	#	}
+	my $retStr=join('',@chars);
+	#print "The retStr is $retStr\n";
+	return $retStr;
+	}
+
 
 
 sub GETMODEL{
@@ -237,6 +274,7 @@ sub RICSCORE{
     my $permID=0;
     if($perm_stat==0) 
 	{
+		$num_perms=1;
 	    open(FOUT,">$outfile");
 	}
     else
@@ -279,6 +317,7 @@ sub RICSCORE{
 			$tempin =~ s/\n//g;
 			$tempin =~ s/\r//g;
 			$tempin =~ tr/[A-Z]/[a-z]/;
+
 			@ricseq = split(//,$tempin);
 
 			while($fileempty==0){
@@ -307,23 +346,23 @@ sub RICSCORE{
 						$prob = ($q + ($a/(4**$class)))/($colcounts[$lastpos-1] + $a);
 						$prob = log($prob);
 						$totalprod = $totalprod + $prob;
-				    }
+				    } #for each model
 				    
 				    $end = $phony+$searchspace-1;
 
 				    if($totalprod >= $_[0]){
-					    print FOUT "$fastaheader\t";
-					    print FOUT "$phony\t$end\t";
+					    print FOUT "MYHEADER$fastaheader\t";
+					    print FOUT "MYPHONY$phony\t$end\t";
 					    for($counter=0;$counter<$searchspace;$counter++){
-							print FOUT $ricseq[$counter];
+							print FOUT "THESEQ".$ricseq[$counter];
 					    }
-					    print FOUT "\t$totalprod";
+					    print FOUT "\tTHETOT$totalprod";
 					    print FOUT "\n";
-				    }
+				    } #if total prod >= 
 
 				}
 				shift(@ricseq);
-			}#end of while($fileempty==0)
+			} #end of while($fileempty==0)
 		    
 		if (-e $tempPath){
 		   unlink($tempPath);
