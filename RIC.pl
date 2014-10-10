@@ -1,7 +1,7 @@
-#**********************USAGE**********************#
-# prompt> perl RIC.pl <sequence file>             #
-#                                                 #
-#*************************************************#
+#**********************USAGE****************************************#
+# prompt> perl RIC.pl <sequence file> RC_YN PERM_MODE_YN NUM_PERMS  #
+#                                                                   #
+#*******************************************************************#
 
 use strict;
 use File::Basename;
@@ -16,15 +16,64 @@ my $rstype;
 my $outfile;
 my $searchfile;
 my $tempseqfile;
+my $revcomp_stat;
+my $revcomp_arg;
+my $perm_arg;
+my $perm_stat;
 my @exts = qw(.txt .fa .fasta);
+my $num_perms=1;
 
 #Read in the sequence(s) to be searched for RIC scoring.
 $searchfile = $ARGV[0];
+$revcomp_arg= $ARGV[1];
 if ($searchfile eq ""){
     print "Enter the name of the file containing the sequences to search: ";
     $searchfile = <STDIN>;
 }
+if(!( ($revcomp_arg=~m/^yes$/i) || ($revcomp_arg=~m/^no$/i) ) )
+	{
+	die "Error, expect revcomp_arg be 'yes' or 'no' !\n";
+	}
+else
+	{
+	if($revcomp_arg=~m/^yes$/i)
+		{
+		$revcomp_stat=1;
+		}
+	else
+		{
+		$revcomp_stat=0;
+		}
+	}
 
+
+$perm_arg=$ARGV[2];
+if(!( ($perm_arg=~m/^yes$/i) || ($perm_arg=~m/^no$/i) ) )
+	{
+	die "Error, expect permutation argument either 'yes' or 'no' !\n";
+	}
+else
+	{
+	if($perm_arg=~m/^yes/i)
+		{
+		$perm_stat=1;
+		}
+	else
+		{
+		$perm_stat=0;
+		}
+	}
+
+
+$num_perms=$ARGV[3];
+if(!($num_perms=~m/^[0-9]+$/))
+	{
+	die "Invalid 'num_perms' value $num_perms !\n";
+	}
+if($num_perms<1)
+	{
+	die "Invalid 'num_perms' value  $num_perms . Must be a positive integer!\n";
+	}
 
 
 
@@ -158,6 +207,10 @@ sub INITMODEL{
     print "Initialization complete.\n";
 }
 
+
+
+
+
 sub RICSCORE{
     (my $a);
     (my $x);
@@ -194,11 +247,18 @@ sub RICSCORE{
     }
     
     print "Computing RIC scores for $searchfile.\nSaving to $outfile. . .\n";
-    
-    open(FOUT,">$outfile");
+    if($perm_stat==0) 
+	{
+	    open(FOUT,">$outfile");
+	}
+    else
+	{
+	    open(FOUT,">>$outfile");
+	}
     open(ISEQ, "<$searchfile");
     my $tempPath="/dev/shm/$outfile.temp.txt";
     #my $numTempPathIO=0;
+    
 
     while($tempin = <ISEQ>){
 		
