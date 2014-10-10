@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import argparse as ap
 from Bio.SeqRecord import SeqRecord
 from Bio import SeqIO
