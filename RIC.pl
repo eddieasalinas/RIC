@@ -118,7 +118,7 @@ sub fisher_yates_shuffle {
 
 sub PERMUTE_STR {
 	my $inStr=$_[0];
-	print "instr is $inStr\n";
+	#print "instr is $inStr\n";
 	#FROM http://perlmeme.org/faqs/manipulating_text/string_characters.html
 	my @chars = map substr( $inStr, $_, 1), 0 .. length($inStr) -1;
 	#for(my $c=0;$c<scalar(@chars);$c++)
@@ -429,11 +429,11 @@ sub RICSCORE{
 				{
 				#permute here
 				my $permuted=&PERMUTE_STR($tempin);
-				my $pcRes=verifyPermutation($permuted,$tempin);
-				if($pcRes==0)
-					{
-					die "Apperently string 1 '$tempin' didn't get correctly permuted to '$permuted' !\n";
-					}
+				#my $pcRes=verifyPermutation($permuted,$tempin);
+				#if($pcRes==0)
+				#	{
+				#	die "Apperently string 1 '$tempin' didn't get correctly permuted to '$permuted' !\n";
+				#	}
 				$tempin=$permuted;
 				}
 			@ricseq = split(//,$tempin);
