@@ -60,9 +60,23 @@ if($num_perms<1)
 	die "Invalid 'num_perms' value  $num_perms . Must be a positive integer!\n";
 	}
 
+
+
+
 #my $h="hello";
 #my $ph=&PERMUTE_STR($h);
+#my %hchello=&getCharCountHash($h);
+#for my $k  (keys(%hchello))
+#	{
+#	print "$k is a key in the map its value is  ".$hchello{$k}."\n";
+#	}
+#my $pcRes=verifyPermutation($h,$ph);
+#print "The pcres is $pcRes\n";
+#$ph="hell";
+#$pcRes=verifyPermutation($h,$ph);
+#print "The pcres is $pcRes\n";
 #die "perm_mode=".$perm_stat." and num_perms=".$num_perms." AND PH=$ph\n";
+
 
 
 $searchfile =~ s/\n//g;
@@ -121,6 +135,99 @@ sub PERMUTE_STR {
 	#print "The retStr is $retStr\n";
 	return $retStr;
 	}
+
+
+
+sub getCharCountHash {
+	my $inStr=$_[0];
+	#print "Input to getCharCountHash is $inStr\n";
+	my @chars = map substr( $inStr, $_, 1), 0 .. length($inStr) -1;
+	my %hash_ref ;
+	for(my $c=0;$c<scalar(@chars);$c++)
+		{
+		#print "In init looking at ".$chars[$c]."...\n";
+		if( exists  $hash_ref{ $chars[$c] })
+			{
+			$hash_ref{$chars[$c]}=$hash_ref{$chars[$c]}+1;
+			}
+		else
+			{
+			$hash_ref{$chars[$c]}=1;
+			}
+		#print "The value is now ".$hash_ref{$chars[$c]}."\n";
+		}
+	return %hash_ref
+	}
+
+
+sub verifyPermutation {
+	#VERIFY PERMUTATION BOTH-WAYS
+	my $p1=$_[0];
+	my $p2=$_[1];
+	if($p1 eq $p2)
+		{
+		#the two strings shouldn't be equal, but one should be a permutation of the other!
+		return 0;
+		}
+	#print "Verified that $p1  not eq $p2\n";
+	my $firstWay=verifyPermutationOW($p1,$p2);
+	my $secondWay=verifyPermutationOW($p2,$p1);
+	if($firstWay==1 && $secondWay==1)
+		{
+		return 1;
+		}
+	else
+		{
+		return 0;
+		}
+	}
+
+
+sub verifyPermutationOW {
+	#VERIFY PERMUTATION ONE-WAY
+	my $p1=$_[0];
+	my $p2=$_[1];
+	#print "In VP p1 is $p1 and p2 is $p2\n";
+	my %m1=&getCharCountHash($p1);
+	my %m2=&getCharCountHash($p2);
+	my $nk1=scalar(keys(%m1));
+	my $nk2=scalar(keys(%m2));
+
+	#print "\n\n\n";
+	#for my $k  (keys(%m1))
+	#	{
+	#	print "$k is a key in the m1 map its value is  ".$m1{$k}."\n";
+	#	}
+	#print "\n\n\n";
+
+	if($nk1!=$nk2)
+		{
+		#mismatch in size of key sets!
+		#print "mismatch in key sizes!\n";
+		return 0;
+		}
+
+	for my $k  (keys(%m1))
+		{
+		my $m1val=$m1{$k};
+		if(exists  $m2{$k})
+			{
+			my $m2val=$m2{$k};
+			if($m2val!=$m1val)
+				{
+				#value mismatch!
+				return 0;
+				}
+			}
+		else
+			{
+			#doesn't exist!
+			return 0;
+			}
+		}
+	return 1;
+	}
+
 
 
 
@@ -321,6 +428,11 @@ sub RICSCORE{
 				{
 				#permute here
 				my $permuted=&PERMUTE_STR($tempin);
+				my $pcRes=verifyPermutation($permuted,$tempin);
+				if($pcRes==0)
+					{
+					die "Apperently string 1 '$tempin' didn't get correctly permuted to '$permuted' !\n";
+					}
 				$tempin=$permuted;
 				}
 			@ricseq = split(//,$tempin);
