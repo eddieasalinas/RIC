@@ -320,7 +320,7 @@ sub RICSCORE{
 			if($perm_stat==1)
 				{
 				#permute here
-				my $permuted=$tempin;
+				my $permuted=&PERMUTE_STR($tempin);
 				$tempin=$permuted;
 				}
 			@ricseq = split(//,$tempin);
@@ -356,19 +356,16 @@ sub RICSCORE{
 				    $end = $phony+$searchspace-1;
 
 				    if($totalprod >= $_[0]){
-					    if($perm_stat==0)
-						{
 					    print FOUT "$fastaheader\t";
-						}
-						else
-						{
-					    print FOUT "$fastaheader.P=$permID\t";
-						}
 					    print FOUT "$phony\t$end\t";
 					    for($counter=0;$counter<$searchspace;$counter++){
 							print FOUT "".$ricseq[$counter];
 					    }
 					    print FOUT "\t$totalprod";
+					    if($perm_stat==1)
+							{
+							print FOUT "\t$permID";
+							}
 					    print FOUT "\n";
 				    } #if total prod >= 
 
