@@ -392,7 +392,8 @@ sub RICSCORE{
     
     for(my $permID=1;$permID<=$num_perms;$permID++)
 	{
-
+	    my $pct_cmplt=(($permID*1.0)/($num_perms*1.0))*100.0;
+	    print STDERR "Running with permutation ID=".$permID." of ".$num_perms." ; pct = ".$pct_cmplt."\n";
 
 	    open(ISEQ, "<$searchfile");
 	    my $tempPath="/dev/shm/$outfile.temp.txt";
