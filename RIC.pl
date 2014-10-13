@@ -491,8 +491,8 @@ sub RICSCORE{
 		}
 	
 		}#end of while(loopthroughtempseq)
-	    close(I);
-	    close(FOUT);
+	    close(ISEQ);
+
 
 
 
@@ -502,7 +502,7 @@ sub RICSCORE{
 
 	} # END perm ID loop
 
-
+    close(FOUT);
 
     #print "numTempPathIO is $numTempPathIO\n";
 }
