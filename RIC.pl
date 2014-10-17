@@ -386,7 +386,9 @@ sub RICSCORE{
 	}
     else
 	{
-	    open(FOUT,">>$outfile");
+
+	    $outfile.=".gz";
+	    open(FOUT,"|gzip -c >> $outfile");
 	}
 
     
