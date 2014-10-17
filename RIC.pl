@@ -91,6 +91,7 @@ $numseqs = 0;
 &RICSCORE(-45);
 
 #Calculate Scores for 23RSS
+@seqs=();
 $outfile = basename($searchfile,@exts).".23RSS.scores";
 &GETMODEL("MM23.model");
 $numseqs = 0;
